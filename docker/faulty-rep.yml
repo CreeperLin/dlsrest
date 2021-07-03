@@ -1,0 +1,35 @@
+#docker-compose.yaml
+version: '3.7'
+
+# starts docker containers running dlsrest server instances.
+services:
+  dlsrest-leader:
+    image: creeperlin/dlsrest
+    command: ./server http://dlsrest-leader:$DLS_PORT
+    ports:
+      - 8890:8888
+
+  dlsrest-rep-1:
+    image: creeperlin/dlsrest
+    command: bash -c "sleep 5; while true; do timeout 10s ./server http://dlsrest-rep-1:$DLS_PORT http://dlsrest-leader:$DLS_PORT; sleep $$(( $${RANDOM} % 5)); done"
+    ports:
+      - 8891:8888
+
+  dlsrest-rep-2:
+    image: creeperlin/dlsrest
+    command: bash -c "sleep 5; while true; do timeout 10s ./server http://dlsrest-rep-2:$DLS_PORT http://dlsrest-leader:$DLS_PORT; sleep $$(( $${RANDOM} % 5)); done"
+    ports:
+      - 8892:8888
+
+  dlsrest-rep-3:
+    image: creeperlin/dlsrest
+    command: bash -c "sleep 5; while true; do timeout 10s ./server http://dlsrest-rep-3:$DLS_PORT http://dlsrest-leader:$DLS_PORT; sleep $$(( $${RANDOM} % 5)); done"
+    ports:
+      - 8893:8888
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8888:8888
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
